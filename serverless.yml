@@ -1,0 +1,21 @@
+service: blog-at-edge
+custom:
+  stage: ${opt:stage, self:provider.stage}
+  bucketName: blog-at-edge-${self:custom.stage}
+provider:
+  name: aws
+  runtime: nodejs10.x
+functions:
+  blog:
+    handler: handler.blog
+    name: ${self:custom.bucketName}
+    events:
+      - cloudFront:
+          eventType: viewer-request
+          origin: s3://${self:custom.bucketName}.s3.amazonaws.com
+resources:
+  Resources:
+    S3Bucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${self:custom.bucketName}
